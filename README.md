@@ -1,5 +1,7 @@
 # Miao
 
+![Miao Logo](./miao.png)
+
 A Python script for generating CMake files, with a user-friendly, Cargo-like command line interface. (UNDER CONSTRUCTION)
 
 <br>
