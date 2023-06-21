@@ -4,6 +4,19 @@ A Python script for generating CMake files, with a user-friendly, Cargo-like com
 
 (UNDER CONSTRUCTION❕)
 
+TODO:
+
+- ☑ miao new
+  - ☑ miao new --language --standard
+  - ☐ miao new --lib
+- ☐ miao build
+- ☐ miao run
+- ☐ miao clean
+- ☐ miao init
+- ☐ miao add
+- ☐ miao remove
+- ☐ miao config
+
 ## Usage
 
 - Creating a new project
