@@ -6,8 +6,8 @@ A Python script for generating CMake files, with a user-friendly, Cargo-like com
 
 TODO:
 
-- ☑ miao new
-  - ☑ miao new --language LANG --standard STD
+- ☑ miao new PROJECT_NAME
+  - ☑ miao new PROJECT_NAME --language LANG --standard STD
   - ☐ miao new --lib
 - ☑ miao build
 - ☑ miao run
