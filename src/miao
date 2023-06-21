@@ -44,6 +44,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         """
         Apply different colors according to the different output types."
         """
+
         LOG = enum.auto()
         WARNING = enum.auto()
         ERROR = enum.auto()
@@ -121,7 +122,6 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         current_directory: str = os.getcwd()
         for file_name in os.listdir():
             if project_name == file_name:
-
                 # Instead of
                 # ```raise RuntimeError("Already exists")```,
                 # handle it more elegantly
@@ -148,20 +148,38 @@ file(GLOB_RECURSE SOURCES "src/*.c")
             )
             self._print("CMakelists.txt", _ljust("Added"))
 
-            # for debugging purpose,
-            # so that users will know what was written to
-            # the CMake file immediately & directly from
-            # their terminal
-            __tmp: str = self.language_options.replace("\n", _ljust("\n"))
-            self._print(f"```{__tmp}```", _ljust("(debug)"))
+        # for debugging purpose,
+        # so that users will know what was written to
+        # the CMake file immediately & directly from
+        # their terminal
+        __tmp: str = self.language_options.replace("\n", _ljust("\n    "))
+        self._print(f"```{__tmp}```", _ljust("(debug)"))
 
         # Creating `src` directory
         os.mkdir(f"{project_directory}/src")
-        self._print("`src` directory", _ljust("Created"))
+        self._print("src/ directory", _ljust("Created"))
+
+        # Creating minimum source file
+        source_code_file_name: str = f"main.{'c' if language == 'c' else 'cpp'}"
+        with open(
+            f"{project_directory}/src/{source_code_file_name}", "w"
+        ) as minimum_source_code:
+            MINIMUM_SOURCE_CODE: str = """
+#include <stdio.h>
+
+
+int main(int argc, char** argv) {
+
+    puts("Hello, world!");
+    return 0;
+}
+            """.strip()
+            minimum_source_code.write(MINIMUM_SOURCE_CODE)
+            self._print(source_code_file_name, _ljust("Added"))
 
         # Creating `build` directory
         os.mkdir(f"{project_directory}/build")
-        self._print("`build` directory", _ljust("Created"))
+        self._print("build/ directory", _ljust("Created"))
 
 
 if __name__ == "__main__":
