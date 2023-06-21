@@ -17,10 +17,10 @@ class Miao:
 
     basic_template = """
 cmake_minimum_required(VERSION 3.0)
-project({{ self.project_name }})
-    """
+project({{ project_name }})
+""".strip()
 
-    class ConsoleOutputType(enum.Enum):
+    class _ConsoleOutputType(enum.Enum):
         LOG = enum.auto()
         WARNING = enum.auto()
         ERROR = enum.auto()
@@ -28,13 +28,13 @@ project({{ self.project_name }})
     def __init__(self, use_color: bool = True):
         self.use_color: bool = use_color
 
-    def print(
-        self, text: str = "", prefix: str = "", output_type: ConsoleOutputType = ConsoleOutputType.LOG
+    def _print(
+        self, text: str = "", prefix: str = "", output_type: _ConsoleOutputType = _ConsoleOutputType.LOG
     ):
         if self.use_color:
-            if output_type is Miao.ConsoleOutputType.ERROR:
+            if output_type is Miao._ConsoleOutputType.ERROR:
                 prefix = f"{colorama.Fore.RED}{prefix}{colorama.Fore.RESET}"
-            elif output_type is Miao.ConsoleOutputType.WARNING:
+            elif output_type is Miao._ConsoleOutputType.WARNING:
                 prefix = f"{colorama.Fore.YELLOW}{prefix}{colorama.Fore.RESET}"
             else:
                 prefix = f"{colorama.Fore.GREEN}{prefix}{colorama.Fore.RESET}"
@@ -49,20 +49,20 @@ project({{ self.project_name }})
         for file_name in os.listdir():
             if project_name == file_name:
                 # raise RuntimeError("Already exists")
-                self.print(
+                self._print(
                     f"`{self.project_name}` already exists",
                     "error",
-                    Miao.ConsoleOutputType.ERROR,
+                    Miao._ConsoleOutputType.ERROR,
                 )
                 sys.exit(1)
         os.mkdir(project_name)
         self.project_name = project_name
-        self.print(self.project_name, "Created")
+        self._print(self.project_name, "Created")
         with open(
             f"{current_directory}/{self.project_name}/CMakeLists.txt", "w"
         ) as cmake_list:
-            cmake_list.write(jinja2.Template(self.basic_template).render())
-            self.print("CMakelists.txt", "Added")
+            cmake_list.write(jinja2.Template(self.basic_template).render(project_name=self.project_name))
+            self._print("CMakelists.txt", "Added")
 
 
 if __name__ == "__main__":
