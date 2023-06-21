@@ -7,6 +7,7 @@ import sys
 import fire
 import enum
 import jinja2
+import datetime
 import colorama
 import subprocess
 from typing import Union
@@ -25,6 +26,7 @@ class Miao:
     """
 
     sep: str = os.sep
+    width: int = os.get_terminal_size()[0]
 
     # Basic CMakeLists.txt file
     basic_template: str = """
@@ -102,9 +104,12 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         """
         Run the current project.
         """
+
         executable: str = self.build()
-        print()
+        time_now: str = str(datetime.datetime.now())
+        print(f"{time_now.center(self.width, '=')}")
         self._print(executable, "Running")
+        print(self.width * "=")
         subprocess.run([executable])
 
     def _enter_build_dir(self, *, echo: bool = True) -> str:

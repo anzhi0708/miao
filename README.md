@@ -60,8 +60,9 @@ $ miao run
 [ 50%] Building CXX object CMakeFiles/hello_world.dir/src/main.cpp.o
 [100%] Linking CXX executable hello_world
 [100%] Built target hello_world
-
+===========================2023-06-22 07:28:14.553143==========================
 Running /Users/Me/dev/python/miao/src/hello_world/build/hello_world
+===============================================================================
 Hello, world!
 
 
