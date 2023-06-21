@@ -19,6 +19,8 @@ class Miao:
     Project manager for generating CMake file
     """
 
+    sep: str = os.sep
+
     # Basic CMakeLists.txt file
     basic_template: str = """
 cmake_minimum_required(VERSION 3.0)
@@ -56,6 +58,10 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         """
         self.use_color: bool = use_color
 
+    @property
+    def current_directory(self) -> str:
+        return os.getcwd()
+
     def _print(
         self,
         text: str = "",
@@ -70,6 +76,13 @@ file(GLOB_RECURSE SOURCES "src/*.c")
             else:
                 prefix = f"{colorama.Fore.GREEN}{prefix}{colorama.Fore.RESET}"
         print(f"{prefix} {text}")
+
+    def run(self):
+        """
+        Run the current project.
+        """
+        print(self.current_directory)
+        self._todo()
 
     def new(self, project_name: str = "", *, language: str = "cpp", standard: str = ""):
         """
@@ -119,7 +132,6 @@ file(GLOB_RECURSE SOURCES "src/*.c")
             )
 
         # Check if directory exists
-        current_directory: str = os.getcwd()
         for file_name in os.listdir():
             if project_name == file_name:
                 # Instead of
@@ -136,7 +148,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         os.mkdir(project_name)
         self.project_name = project_name
         self._print(self.project_name, _ljust("Created"))
-        project_directory: str = f"{current_directory}/{self.project_name}"
+        project_directory: str = f"{self.current_directory}/{self.project_name}"
 
         # Creating `CMakeLists.txt`
         with open(f"{project_directory}/CMakeLists.txt", "w") as cmake_list:
@@ -180,6 +192,17 @@ int main(int argc, char** argv) {
         # Creating `build` directory
         os.mkdir(f"{project_directory}/build")
         self._print("build/ directory", _ljust("Created"))
+
+    def _todo(self):
+        import inspect
+
+        current_frame = inspect.currentframe()
+        caller_frame = inspect.getouterframes(current_frame, 2)
+        caller_name = caller_frame[1][3]
+        self._print("comming soon", f"`{caller_name}`", Miao._ConsoleOutputType.WARNING)
+        self._print(
+            "not implemented", f"`{caller_name}`", Miao._ConsoleOutputType.WARNING
+        )
 
 
 if __name__ == "__main__":
