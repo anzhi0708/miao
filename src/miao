@@ -50,7 +50,7 @@ project({{ project_name }})
             if project_name == file_name:
                 # raise RuntimeError("Already exists")
                 self._print(
-                    f"`{self.project_name}` already exists",
+                    f"`{project_name}` already exists",
                     "error",
                     Miao._ConsoleOutputType.ERROR,
                 )
