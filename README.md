@@ -1,13 +1,15 @@
 # Miao
 
-A Python script for generating CMake files, with a user-friendly, Cargo-like command line interface.
+A Python script for generating CMake files, with a user-friendly, Cargo-like command line interface. (UNDER CONSTRUCTION)
 
-(UNDER CONSTRUCTION❕)
+<br>
 
 TODO:
 
-- ☑ miao new PROJECT_NAME
-  - ☑ miao new PROJECT_NAME --language LANG --standard STD
+<br>
+
+- ☑ miao new
+  - ☑ miao new --language --standard 
   - ☐ miao new --lib
 - ☑ miao build
 - ☑ miao run
@@ -32,6 +34,7 @@ $ miao new 'hello world' --language cpp --standard 20
  Created   src/ directory
  Added     main.cpp
  Created   build/ directory
+
 
 # Run it!
 
@@ -67,4 +70,5 @@ Hello, world!
 
 $ miao clean
 Removing /Users/Me/dev/python/miao/src/hello_world/build
+
 ```
