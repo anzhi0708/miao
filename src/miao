@@ -12,6 +12,9 @@ import subprocess
 from typing import Union
 
 
+__version__: str = "20230622"
+
+
 def _ljust(s: str) -> str:
     return " " + s.ljust(9, " ")
 
@@ -58,6 +61,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         If the standard output is TTY,
         then enable color; otherwise, do not enable it.
         """
+        print(f"Miao Version {__version__}")
         self.use_color: bool = use_color
 
     @property
