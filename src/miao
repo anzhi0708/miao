@@ -8,10 +8,12 @@ import fire
 import enum
 import jinja2
 import colorama
+import subprocess
+from typing import Union
 
 
 def _ljust(s: str) -> str:
-    return s.ljust(9, " ")
+    return " " + s.ljust(9, " ")
 
 
 class Miao:
@@ -77,12 +79,80 @@ file(GLOB_RECURSE SOURCES "src/*.c")
                 prefix = f"{colorama.Fore.GREEN}{prefix}{colorama.Fore.RESET}"
         print(f"{prefix} {text}")
 
+    def _find_project_root(self, start, filename: str) -> Union[str, None]:
+        current = start
+        while True:
+            if filename in os.listdir(current):
+                return current
+            else:
+                parent = os.path.dirname(current)
+                if parent == current:
+                    return None
+                else:
+                    current = parent
+
+    def find_project_root(self) -> Union[str, None]:
+        return self._find_project_root(self.current_directory, "CMakeLists.txt")
+
     def run(self):
         """
         Run the current project.
         """
-        print(self.current_directory)
-        self._todo()
+        executable: str = self.build()
+        print()
+        self._print(executable, "Running")
+        subprocess.run([executable])
+
+    def _enter_build_dir(self, *, echo: bool = True) -> str:
+        """
+        If the path does not exist,
+        create the directory.
+        This function will establish some instance variables so that they can be used in other functions that call it.
+        This function also returns the path to the build directory for further use,
+        such as in the clean command.
+        Since CMake does not come with a built-in clean command,
+        the best practice suggested online is to delete the build directory.
+        """
+        root: Union[str, None] = self.find_project_root()
+        if root is None:
+            self._print(
+                f"could not find `CMakeLists.txt` in `{self.current_directory}` or any parent directory",
+                "error:",
+                Miao._ConsoleOutputType.ERROR,
+            )
+            sys.exit(2)
+        if echo:
+            self._print(root, _ljust("root: "))
+        self.project_name = root.split(self.sep)[-1]
+        old_dir: str = self.current_directory
+        if echo:
+            self._print(old_dir, _ljust("pwd: "))
+        if os.path.exists(build_dir := f"{root}/build"):
+            if echo:
+                self._print(build_dir, _ljust("Entering"))
+            os.chdir(build_dir)
+        else:
+            self._print(build_dir, "mkdir")
+            os.mkdir(build_dir)
+            if echo:
+                self._print(build_dir, "Entering")
+            os.chdir(build_dir)
+        self.project_root: str = root
+        self.old_dir: str = old_dir
+        self.build_dir: str = build_dir
+        return build_dir
+
+    def build(self) -> str:
+        self._enter_build_dir()
+        subprocess.run(["cmake", self.project_root])
+        subprocess.run(["make"])
+        os.chdir(self.old_dir)
+        return f"{self.build_dir}/{self.project_name}"
+
+    def clean(self):
+        build_dir: str = self._enter_build_dir(echo=False)
+        self._print(build_dir, "Removing")
+        subprocess.run(["rm", "-rf", build_dir])
 
     def new(self, project_name: str = "", *, language: str = "cpp", standard: str = ""):
         """
