@@ -19,6 +19,14 @@ TODO:
 - ☐ miao remove
 - ☐ miao config
 
+<br>
+
+## Installation
+
+```bash
+pip3 install miao-make
+```
+
 ## Usage
 
 ```bash

@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+
+[project]
+name = "miao-make"
+authors = [ { name = "Anji Wong", email = "anzhi0708@gmail.com" } ]
+description = "Cargo-like project management tool for working with CMake"
+readme = "README.md"
+dependencies = ["colorama", "fire", "Jinja2"]
+keywords = ["cmake", "cmakelists"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dynamic = ["version"]
+
+[tool.setuptools.dynamic]
+version = { attr = "miao.__version__" }
+
+[project.scripts]
+miao = "miao:main"
+
+[project.urls]
+"Homepage" = "https://github.com/anzhi0708/miao"

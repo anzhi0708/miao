@@ -284,5 +284,9 @@ int main(int argc, char** argv) {
         )
 
 
-if __name__ == "__main__":
+def main():
     fire.Fire(Miao(True if sys.stdout.isatty() else False))
+
+
+if __name__ == "__main__":
+    main()
