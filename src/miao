@@ -2,8 +2,11 @@
 
 
 import os
+import sys
 import fire
+import enum
 import jinja2
+import colorama
 
 
 class Miao:
@@ -17,6 +20,26 @@ cmake_minimum_required(VERSION 3.0)
 project({{ self.project_name }})
     """
 
+    class OutputType(enum.Enum):
+        LOG = enum.auto()
+        WARNING = enum.auto()
+        ERROR = enum.auto()
+
+    def __init__(self, use_color: bool = True):
+        self.use_color: bool = use_color
+
+    def print(
+        self, text: str = "", prefix: str = "", output_type: OutputType = OutputType.LOG
+    ):
+        if self.use_color:
+            if output_type is Miao.OutputType.ERROR:
+                prefix = f"{colorama.Fore.RED}{prefix}{colorama.Fore.RESET}"
+            elif output_type is Miao.OutputType.WARNING:
+                prefix = f"{colorama.Fore.YELLOW}{prefix}{colorama.Fore.RESET}"
+            else:
+                prefix = f"{colorama.Fore.GREEN}{prefix}{colorama.Fore.RESET}"
+        print(f"{prefix} {text}")
+
     def new(self, project_name: str):
         """
         Create a new project.
@@ -25,11 +48,22 @@ project({{ self.project_name }})
         current_directory = os.getcwd()
         for file_name in os.listdir():
             if project_name == file_name:
-                raise RuntimeError("Already exists")
-        os.mkdir(project_name)        
+                # raise RuntimeError("Already exists")
+                self.print(
+                    f"`{self.project_name}` already exists",
+                    "error",
+                    Miao.OutputType.ERROR,
+                )
+                sys.exit(1)
+        os.mkdir(project_name)
         self.project_name = project_name
-        print(f"{self.project_name} created")
+        self.print(self.project_name, "Created")
+        with open(
+            f"{current_directory}/{self.project_name}/CMakeLists.txt", "w"
+        ) as cmake_list:
+            cmake_list.write(jinja2.Template(self.basic_template).render())
+            self.print("CMakelists.txt", "Added")
 
 
 if __name__ == "__main__":
-    fire.Fire(Miao)
+    fire.Fire(Miao(True if sys.stdout.isatty() else False))
