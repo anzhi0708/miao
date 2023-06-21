@@ -10,18 +10,21 @@ import jinja2
 import colorama
 
 
+def _ljust(s: str) -> str:
+    return s.ljust(9, " ")
+
+
 class Miao:
     """
     Project manager for generating CMake file
     """
+
     # Basic CMakeLists.txt file
     basic_template: str = """
-
 cmake_minimum_required(VERSION 3.0)
 project({{ project_name }})
 {{ language_options }}
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
 add_executable({{ project_name }} ${SOURCES})
     """.strip()
 
@@ -38,11 +41,18 @@ file(GLOB_RECURSE SOURCES "src/*.c")
     """.strip()
 
     class _ConsoleOutputType(enum.Enum):
+        """
+        Apply different colors according to the different output types."
+        """
         LOG = enum.auto()
         WARNING = enum.auto()
         ERROR = enum.auto()
 
     def __init__(self, use_color: bool = True):
+        """
+        If the standard output is TTY,
+        then enable color; otherwise, do not enable it.
+        """
         self.use_color: bool = use_color
 
     def _print(
@@ -66,74 +76,92 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         """
         project_name = project_name.replace(" ", "_")
 
-        # Check if project name is valid
+        # Check if project name is valid.
         def is_valid_string(s: str) -> bool:
-            return bool(re.fullmatch(r'^[\w-]+$', s))
-        if project_name == "" or project_name[0].isdigit() \
-                or not is_valid_string(project_name):
+            return bool(re.fullmatch(r"^[\w-]+$", s))
+
+        if (
+            project_name == ""
+            or project_name[0].isdigit()
+            or not is_valid_string(project_name)
+        ):
             self._print(
-                "invalid project name",
-                "error",
-                Miao._ConsoleOutputType.ERROR
+                "invalid project name", _ljust("error"), Miao._ConsoleOutputType.ERROR
             )
             sys.exit(1)
 
         language_options: str = ""
+        language = language.lower()
 
-        if language.lower() not in ("c", "cpp", "cxx", "c++"):
+        if language not in ("c", "cpp", "cxx", "c++"):
             self._print(
                 "invalid language option",
-                "error",
-                Miao._ConsoleOutputType.ERROR
+                _ljust("error"),
+                Miao._ConsoleOutputType.ERROR,
             )
             sys.exit(1)
         else:
             if language in ("cpp", "cxx", "c++"):
                 language_options += self.template_cpp
                 if standard == "":
-                    standard = 17
-            else:
+                    standard = "17"
+            elif language == "c":
                 language_options += self.template_c
                 if standard == "":
-                    standard = 11
+                    standard = "11"
+            else:
+                sys.exit(1)
 
-            language_options = jinja2.Template(
-                language_options
-            ).render(lang_standard=standard)
+            # Embed it into the template string later.
+            self.language_options = jinja2.Template(language_options).render(
+                lang_standard=standard
+            )
 
         # Check if directory exists
         current_directory: str = os.getcwd()
         for file_name in os.listdir():
             if project_name == file_name:
-                # raise RuntimeError("Already exists")
+
+                # Instead of
+                # ```raise RuntimeError("Already exists")```,
+                # handle it more elegantly
                 self._print(
                     f"directory `{project_name}` already exists",
-                    "error",
+                    _ljust("error"),
                     Miao._ConsoleOutputType.ERROR,
                 )
                 sys.exit(1)
+
         # Creating project directory
         os.mkdir(project_name)
         self.project_name = project_name
-        self._print(self.project_name, "Created")
+        self._print(self.project_name, _ljust("Created"))
         project_directory: str = f"{current_directory}/{self.project_name}"
+
         # Creating `CMakeLists.txt`
         with open(f"{project_directory}/CMakeLists.txt", "w") as cmake_list:
             cmake_list.write(
                 jinja2.Template(self.basic_template).render(
                     project_name=self.project_name,
-                    language_options=language_options
+                    language_options=self.language_options,
                 )
             )
-            self._print("CMakelists.txt", "Added")
+            self._print("CMakelists.txt", _ljust("Added"))
+
+            # for debugging purpose,
+            # so that users will know what was written to
+            # the CMake file immediately & directly from
+            # their terminal
+            __tmp: str = self.language_options.replace("\n", _ljust("\n"))
+            self._print(f"```{__tmp}```", _ljust("(debug)"))
 
         # Creating `src` directory
         os.mkdir(f"{project_directory}/src")
-        self._print("`src` directory", "Created")
+        self._print("`src` directory", _ljust("Created"))
 
         # Creating `build` directory
         os.mkdir(f"{project_directory}/build")
-        self._print("`build` directory", "Created")
+        self._print("`build` directory", _ljust("Created"))
 
 
 if __name__ == "__main__":
