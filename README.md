@@ -21,7 +21,6 @@ TODO:
 
 ## Usage
 
-- Creating a new project
 ```bash
 
 # Creating a new project
