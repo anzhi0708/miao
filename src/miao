@@ -20,7 +20,7 @@ cmake_minimum_required(VERSION 3.0)
 project({{ self.project_name }})
     """
 
-    class OutputType(enum.Enum):
+    class ConsoleOutputType(enum.Enum):
         LOG = enum.auto()
         WARNING = enum.auto()
         ERROR = enum.auto()
@@ -29,12 +29,12 @@ project({{ self.project_name }})
         self.use_color: bool = use_color
 
     def print(
-        self, text: str = "", prefix: str = "", output_type: OutputType = OutputType.LOG
+        self, text: str = "", prefix: str = "", output_type: ConsoleOutputType = ConsoleOutputType.LOG
     ):
         if self.use_color:
-            if output_type is Miao.OutputType.ERROR:
+            if output_type is Miao.ConsoleOutputType.ERROR:
                 prefix = f"{colorama.Fore.RED}{prefix}{colorama.Fore.RESET}"
-            elif output_type is Miao.OutputType.WARNING:
+            elif output_type is Miao.ConsoleOutputType.WARNING:
                 prefix = f"{colorama.Fore.YELLOW}{prefix}{colorama.Fore.RESET}"
             else:
                 prefix = f"{colorama.Fore.GREEN}{prefix}{colorama.Fore.RESET}"
@@ -52,7 +52,7 @@ project({{ self.project_name }})
                 self.print(
                     f"`{self.project_name}` already exists",
                     "error",
-                    Miao.OutputType.ERROR,
+                    Miao.ConsoleOutputType.ERROR,
                 )
                 sys.exit(1)
         os.mkdir(project_name)
