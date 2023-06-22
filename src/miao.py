@@ -7,17 +7,14 @@ import sys
 import fire
 import enum
 import jinja2
+import inspect
 import datetime
 import colorama
 import subprocess
-from typing import Union
+from typing import Union, Callable
 
 
-__version__: str = "20230622"
-
-
-def _ljust(s: str) -> str:
-    return " " + s.ljust(9, " ")
+__VERSION__: str = "20230622"
 
 
 class Miao:
@@ -58,13 +55,45 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         WARNING = enum.auto()
         ERROR = enum.auto()
 
+    @property
+    def __version_info__(self) -> str:
+        version_info: str = __VERSION__
+        version_info = f"Miao Version {version_info}"
+        return version_info
+
     def __init__(self, use_color: bool = True):
         """
         If the standard output is TTY,
         then enable color; otherwise, do not enable it.
         """
-        print(f"Miao Version {__version__}")
         self.use_color: bool = use_color
+
+    def version(self):
+        """
+        Print version info and exit.
+        """
+        print(self.__version_info__)
+
+    def help(self):
+        """
+        Print help.
+        """
+        print(self.__version_info__)
+        print()
+        methods: list = [
+            func
+            for func in dir(Miao)
+            if callable(getattr(Miao, func)) and not func.startswith("_")
+        ]
+        method_name_longest: int = max(map(lambda name: len(name), methods))
+        for cmd in methods:
+            print(" ", self._ljust(cmd), end=" " * method_name_longest)
+            docstring: Union[str, None] = getattr(Miao, cmd).__doc__
+            if docstring is not None:
+                docstring = docstring.strip()
+            else:
+                docstring = ""
+            print(docstring)
 
     @property
     def current_directory(self) -> str:
@@ -131,14 +160,14 @@ file(GLOB_RECURSE SOURCES "src/*.c")
             )
             sys.exit(2)
         if echo:
-            self._print(root, _ljust("root: "))
+            self._print(root, self._ljust("root: "))
         self.project_name = root.split(self.sep)[-1]
         old_dir: str = self.current_directory
         if echo:
-            self._print(old_dir, _ljust("pwd: "))
+            self._print(old_dir, self._ljust("pwd: "))
         if os.path.exists(build_dir := f"{root}/build"):
             if echo:
-                self._print(build_dir, _ljust("Entering"))
+                self._print(build_dir, self._ljust("Entering"))
             os.chdir(build_dir)
         else:
             self._print(build_dir, "mkdir")
@@ -152,6 +181,9 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         return build_dir
 
     def build(self) -> str:
+        """
+        Compile the current project.
+        """
         self._enter_build_dir()
         subprocess.run(["cmake", self.project_root])
         subprocess.run(["make"])
@@ -159,6 +191,9 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         return f"{self.build_dir}/{self.project_name}"
 
     def clean(self):
+        """
+        Remove the build directory.
+        """
         build_dir: str = self._enter_build_dir(echo=False)
         self._print(build_dir, "Removing")
         subprocess.run(["rm", "-rf", build_dir])
@@ -179,7 +214,9 @@ file(GLOB_RECURSE SOURCES "src/*.c")
             or not is_valid_string(project_name)
         ):
             self._print(
-                "invalid project name", _ljust("error"), Miao._ConsoleOutputType.ERROR
+                "invalid project name",
+                self._ljust("error"),
+                Miao._ConsoleOutputType.ERROR,
             )
             sys.exit(1)
 
@@ -189,7 +226,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         if language not in ("c", "cpp", "cxx", "c++"):
             self._print(
                 "invalid language option",
-                _ljust("error"),
+                self._ljust("error"),
                 Miao._ConsoleOutputType.ERROR,
             )
             sys.exit(1)
@@ -218,7 +255,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
                 # handle it more elegantly
                 self._print(
                     f"directory `{project_name}` already exists",
-                    _ljust("error"),
+                    self._ljust("error"),
                     Miao._ConsoleOutputType.ERROR,
                 )
                 sys.exit(1)
@@ -226,7 +263,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         # Creating project directory
         os.mkdir(project_name)
         self.project_name = project_name
-        self._print(self.project_name, _ljust("Created"))
+        self._print(self.project_name, self._ljust("Created"))
         project_directory: str = f"{self.current_directory}/{self.project_name}"
 
         # Creating `CMakeLists.txt`
@@ -237,18 +274,18 @@ file(GLOB_RECURSE SOURCES "src/*.c")
                     language_options=self.language_options,
                 )
             )
-            self._print("CMakelists.txt", _ljust("Added"))
+            self._print("CMakelists.txt", self._ljust("Added"))
 
         # for debugging purpose,
         # so that users will know what was written to
         # the CMake file immediately & directly from
         # their terminal
-        __tmp: str = self.language_options.replace("\n", _ljust("\n    "))
-        self._print(f"```{__tmp}```", _ljust("(debug)"))
+        __tmp: str = self.language_options.replace("\n", self._ljust("\n    "))
+        self._print(f"```{__tmp}```", self._ljust("(debug)"))
 
         # Creating `src` directory
         os.mkdir(f"{project_directory}/src")
-        self._print("src/ directory", _ljust("Created"))
+        self._print("src/ directory", self._ljust("Created"))
 
         # Creating minimum source file
         source_code_file_name: str = f"main.{'c' if language == 'c' else 'cpp'}"
@@ -266,27 +303,34 @@ int main(int argc, char** argv) {
 }
             """.strip()
             minimum_source_code.write(MINIMUM_SOURCE_CODE)
-            self._print(source_code_file_name, _ljust("Added"))
+            self._print(source_code_file_name, self._ljust("Added"))
 
         # Creating `build` directory
         os.mkdir(f"{project_directory}/build")
-        self._print("build/ directory", _ljust("Created"))
+        self._print("build/ directory", self._ljust("Created"))
 
     def init(self):
         self._todo()
 
     def config(self):
+        """
+        ...
+        """
         self._todo()
 
     def add(self, dep: str):
+        """
+        ...
+        """
         self._todo()
 
     def remove(self, dep: str):
+        """
+        ...
+        """
         self._todo()
 
     def _todo(self):
-        import inspect
-
         current_frame = inspect.currentframe()
         caller_frame = inspect.getouterframes(current_frame, 2)
         caller_name = caller_frame[1][3]
@@ -294,6 +338,9 @@ int main(int argc, char** argv) {
         self._print(
             "not implemented", f"`{caller_name}`", Miao._ConsoleOutputType.WARNING
         )
+
+    def _ljust(self, s: str) -> str:
+        return " " + s.ljust(9, " ")
 
 
 def main():
