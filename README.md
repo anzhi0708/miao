@@ -1,6 +1,8 @@
 # Miao
 
-![Lines of code](https://img.shields.io/tokei/lines/github/anzhi0708/miao) | ![PyPI](https://img.shields.io/pypi/v/miao-make) | ![PyPI - License](https://img.shields.io/pypi/l/miao-make) | ![PyPI - Format](https://img.shields.io/pypi/format/miao-make)
+![Lines of code](https://img.shields.io/tokei/lines/github/anzhi0708/miao)  ![PyPI](https://img.shields.io/pypi/v/miao-make)  ![PyPI - License](https://img.shields.io/pypi/l/miao-make)  ![PyPI - Format](https://img.shields.io/pypi/format/miao-make)
+
+<br>
 
 <div align="center">
 
