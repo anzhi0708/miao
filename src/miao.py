@@ -272,6 +272,18 @@ int main(int argc, char** argv) {
         os.mkdir(f"{project_directory}/build")
         self._print("build/ directory", _ljust("Created"))
 
+    def init(self):
+        self._todo()
+
+    def config(self):
+        self._todo()
+
+    def add(self, dep: str):
+        self._todo()
+
+    def remove(self, dep: str):
+        self._todo()
+
     def _todo(self):
         import inspect
 
