@@ -1,9 +1,12 @@
 # Miao
 
-<img src="miao.png" alt="Miao Logo" width="10%"/>
+<div align="center">
 
+  <img src="miao.png" alt="Miao Logo" width="13%"/>
 
-A Python script for generating CMake files, with a user-friendly, Cargo-like command line interface. (UNDER CONSTRUCTION)
+  <p>A Python script for generating CMake files, with a user-friendly, Cargo-like command line interface. (UNDER CONSTRUCTION)</p>
+
+</div>
 
 <br>
 
