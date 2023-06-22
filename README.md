@@ -10,10 +10,13 @@
 
 <br>
 
+---
+
 TODO:
 
 <br>
 
+- ☑ miao help
 - ☑ miao new
   - ☑ miao new --language --standard 
   - ☐ miao new --lib
