@@ -103,11 +103,8 @@ $ miao new 'hello world' --language cpp --standard 20
 
 ```bash
 
-# `cd` into it and add library & header file directory
-
 $ cd my_project/
 
-# adding libs and `include_dir`s
 
 $ miao add ncurses --include_dir=$(brew --prefix ncurses)/include
 Adding header directories ['/usr/local/opt/ncurses/include']
