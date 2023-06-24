@@ -20,18 +20,23 @@ TODO:
 
 <br>
 
-- ☑ miao help
 - ☑ miao new
-  - ☑ miao new --language --standard 
-  - ☐ miao new --lib
+  - ☑ --language
+  - ☑ --standard 
+  - ☐ --lib
+- ☑ miao add
+  - ☑ --include_dir
 - ☑ miao build
 - ☑ miao run
 - ☑ miao clean
+- ☑ miao help
 - ☐ miao init
-- ☑ miao add
-  - ☑ miao add --include_dir
+  - ☐ --lib
 - ☐ miao remove
 - ☐ miao config
+  - ☐ --default_language
+  - ☐ --default_language --standard
+  - ☐ --default_include_dir
 
 <br>
 
