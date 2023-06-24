@@ -30,8 +30,18 @@ class Miao:
 cmake_minimum_required(VERSION 3.0)
 project({{ project_name }})
 {{ language_options }}
+
+# begin_find_library
+# end_find_library
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-add_executable({{ project_name }} ${SOURCES})
+add_executable({{ project_name }}.exe ${SOURCES})
+
+# begin_include_directories
+# end_include_directories
+
+# begin_link_libraries
+# end_link_libraries
     """.strip()
 
     # CXX language options
@@ -136,10 +146,14 @@ file(GLOB_RECURSE SOURCES "src/*.c")
 
         executable: str = self.build()
         time_now: str = str(datetime.datetime.now())
+        print()
         print(f"{time_now.center(self.width, '=')}")
-        self._print(executable, "Running")
+        self._print(executable + '\n', "\nRunning")
         print(self.width * "=")
-        subprocess.run([executable])
+        run_result = subprocess.run([executable])
+        if run_result:
+            print()
+            print(f"Process finished with exit code {run_result.returncode}")
 
     def _enter_build_dir(self, *, echo: bool = True) -> str:
         """
@@ -184,11 +198,56 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         """
         Compile the current project.
         """
-        self._enter_build_dir()
-        subprocess.run(["cmake", self.project_root])
-        subprocess.run(["make"])
+
+        def error_exit():
+            self._print("failed to build", "error", Miao._ConsoleOutputType.ERROR)
+
+        build_dir: str = self._enter_build_dir()
+        src_dir: str = build_dir.replace("/build", "/src")
+        run_cmake_result = subprocess.run(["cmake", self.project_root])
+        if run_cmake_result:
+            if run_cmake_result.returncode == 0:
+                self._print(
+                    f"Successfully executed the command: {run_cmake_result.args}",
+                    self._ljust("Success"),
+                )
+            else:
+                error_exit()
+            run_make_result = subprocess.run(["make"])
+            if run_make_result:
+                if run_make_result.returncode == 0:
+                    self._print(
+                        f"Successfully executed the command: {run_make_result.args}",
+                        self._ljust("Success"),
+                    )
+                    copy_compile_commands_result = subprocess.run(
+                        ["cp", "compile_commands.json", src_dir]
+                    )
+                    if copy_compile_commands_result:
+                        if copy_compile_commands_result.returncode == 0:
+                            pass
+                        else:
+                            self._print(
+                                "failed to copy `compile_commands.json`",
+                                "warning",
+                                Miao._ConsoleOutputType.WARNING,
+                            )
+                    else:
+                        self._print(
+                            "failed to copy `compile_commands.json`",
+                            "warning",
+                            Miao._ConsoleOutputType.WARNING,
+                        )
+                    pass
+                else:
+                    error_exit()
+            else:
+                error_exit()
+        else:
+            error_exit()
+
         os.chdir(self.old_dir)
-        return f"{self.build_dir}/{self.project_name}"
+        return f"{self.build_dir}/{self.project_name}.exe"
 
     def clean(self):
         """
@@ -318,11 +377,53 @@ int main(int argc, char** argv) {
         """
         self._todo()
 
-    def add(self, dep: str):
+    def add(self, *libs: Union[list[str], None], **kwargs):
         """
-        ...
+        Add dependencies.
+        Use `--include_dir` to add header file directories.
         """
-        self._todo()
+        root_dir: str = self.find_project_root()
+        project_name: str = root_dir.split(os.sep)[-1]
+
+        if not libs:
+            self._print(
+                f"invalid argument: {libs}", "error", Miao._ConsoleOutputType.ERROR
+            )
+            sys.exit(3)
+
+        include_dirs_to_embed: str = ""
+
+        if "include_dir" in kwargs:
+            header_directories: list[str] = kwargs.get("include_dir").split(",")
+            self._print(f"header directories {header_directories}", "Adding")
+            include_dirs_to_embed = f"target_include_directories({project_name}.exe PRIVATE {' '.join(header_directories)})"
+
+        cmake_lists_txt: str = f"{root_dir}/CMakeLists.txt"
+        to_embed: str = ""
+        self._print(f"{libs} for `{project_name}`", "Adding")
+        with open(cmake_lists_txt, "r+") as cmake_lists:
+            ori_content: str = cmake_lists.read()
+            for lib_name in libs:
+                to_embed += f"find_library({lib_name} NEMES {lib_name})"
+                to_embed += "\n"
+            updated_cmake: str = ori_content.replace(
+                "# begin_find_library", "# begin_find_library\n" + to_embed.strip()
+            ).replace(
+                "# begin_link_libraries",
+                "# begin_link_libraries\n"
+                + f"target_link_libraries({project_name}.exe {' '.join(lib_name for lib_name in libs)})",
+            )
+            if include_dirs_to_embed:
+                updated_cmake = updated_cmake.replace(
+                    "# begin_include_directories",
+                    "# begin_include_directories\n" + include_dirs_to_embed,
+                )
+            self._print("\n" + updated_cmake, "(debug)")
+            cmake_lists.seek(0)
+            cmake_lists.truncate()
+            cmake_lists.write(updated_cmake)
+
+        # self._todo()
 
     def remove(self, dep: str):
         """

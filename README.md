@@ -28,7 +28,8 @@ TODO:
 - ☑ miao run
 - ☑ miao clean
 - ☐ miao init
-- ☐ miao add
+- ☑ miao add
+  - ☑ miao add --include_dir
 - ☐ miao remove
 - ☐ miao config
 
