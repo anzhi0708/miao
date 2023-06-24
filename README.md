@@ -48,9 +48,45 @@ pip3 install miao-make
 
 ## Usage
 
+- `miao help`
+
+```bash
+$ miao help
+Miao Version 20230624
+
+   add                       Add dependencies.
+                             Use `--include_dir` to add header file directories.
+   build                     Compile the current project.
+   clean                     Remove the build directory.
+   config                    ...
+   find_project_root
+   help                      Print help.
+   init
+   new                       Create a new project.
+   remove                    ...
+   run                       Run the current project.
+   version                   Print version info and exit.
+
+```
+
+
+- `miao new` - Creating a new project
+
 ```bash
 
-# Creating a new project
+# Create a new project
+
+$ miao new my_project
+ Created   my_project
+ Added     CMakelists.txt
+ (debug)   ```set(CMAKE_CXX_STANDARD 17)
+        file(GLOB_RECURSE SOURCES "src/*.cpp")```
+ Created   src/ directory
+ Added     main.cpp
+ Created   build/ directory
+
+
+# The `--language` and `--standard` flags
 
 $ miao new 'hello world' --language cpp --standard 20
  Created   hello_world
@@ -60,15 +96,32 @@ $ miao new 'hello world' --language cpp --standard 20
  Created   src/ directory
  Added     main.cpp
  Created   build/ directory
+```
 
 
-# Run it!
+- `miao add` - Adding libraries
 
-$ cd hello_world/
+```bash
+
+# `cd` into it and add library & header file directory
+
+$ cd my_project/
+
+# adding libs and `include_dir`s
+
+$ miao add ncurses --include_dir=(brew --prefix ncurses)/include
+Adding header directories ['/usr/local/opt/ncurses/include']
+Adding ('ncurses',) for `my_project`
+```
+
+
+- Run
+
+```bash
 $ miao run
- root:     /Users/Me/dev/python/miao/src/hello_world
- pwd:      /Users/Me/dev/python/miao/src/hello_world
- Entering  /Users/Me/dev/python/miao/src/hello_world/build
+ root:     /Users/4nji/dev/python/miao/src/my_project
+ pwd:      /Users/4nji/dev/python/miao/src/my_project
+ Entering  /Users/4nji/dev/python/miao/src/my_project/build
 -- The C compiler identification is AppleClang 13.0.0.13000029
 -- The CXX compiler identification is AppleClang 13.0.0.13000029
 -- Detecting C compiler ABI info
@@ -81,20 +134,30 @@ $ miao run
 -- Check for working CXX compiler: /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/c++ - skipped
 -- Detecting CXX compile features
 -- Detecting CXX compile features - done
--- Configuring done (1.0s)
+-- Configuring done (1.5s)
 -- Generating done (0.0s)
--- Build files have been written to: /Users/Me/dev/python/miao/src/hello_world/build
-[ 50%] Building CXX object CMakeFiles/hello_world.dir/src/main.cpp.o
-[100%] Linking CXX executable hello_world
-[100%] Built target hello_world
-===========================2023-06-22 07:28:14.553143==========================
-Running /Users/Me/dev/python/miao/src/hello_world/build/hello_world
+-- Build files have been written to: /Users/4nji/dev/python/miao/src/my_project/build
+ Success   Successfully executed the command: ['cmake', '/Users/4nji/dev/python/miao/src/my_project']
+[ 50%] Building CXX object CMakeFiles/my_project.exe.dir/src/main.cpp.o
+[100%] Linking CXX executable my_project.exe
+[100%] Built target my_project.exe
+ Success   Successfully executed the command: ['make']
+
+===========================2023-06-24 19:56:20.228994==========================
+
+Running /Users/4nji/dev/python/miao/src/my_project/build/my_project.exe
+
 ===============================================================================
 Hello, world!
 
+Process finished with exit code 0
 
-# Cleaning up
+```
 
+
+- Cleaning up
+
+```
 $ miao clean
 Removing /Users/Me/dev/python/miao/src/hello_world/build
 

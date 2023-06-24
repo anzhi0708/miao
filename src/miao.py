@@ -422,7 +422,7 @@ int main(int argc, char** argv) {
                     "# begin_include_directories",
                     "# begin_include_directories\n" + include_dirs_to_embed,
                 )
-            self._print("\n" + updated_cmake, "(debug)")
+            # self._print("\n" + updated_cmake, "(debug)")
             cmake_lists.seek(0)
             cmake_lists.truncate()
             cmake_lists.write(updated_cmake)
