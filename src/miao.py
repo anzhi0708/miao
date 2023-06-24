@@ -97,10 +97,14 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         ]
         method_name_longest: int = max(map(lambda name: len(name), methods))
         for cmd in methods:
-            print(" ", self._ljust(cmd), end=" " * method_name_longest)
+            print(
+                " ", self._ljust(cmd), end=(lplaceholder := " " * method_name_longest)
+            )
             docstring: Union[str, None] = getattr(Miao, cmd).__doc__
             if docstring is not None:
-                docstring = docstring.strip()
+                docstring = docstring.strip().replace(
+                    "\n", "\n" + lplaceholder + " " * len(cmd) + " "
+                )
             else:
                 docstring = ""
             print(docstring)
@@ -148,7 +152,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         time_now: str = str(datetime.datetime.now())
         print()
         print(f"{time_now.center(self.width, '=')}")
-        self._print(executable + '\n', "\nRunning")
+        self._print(executable + "\n", "\nRunning")
         print(self.width * "=")
         run_result = subprocess.run([executable])
         if run_result:
