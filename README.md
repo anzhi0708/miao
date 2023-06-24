@@ -38,6 +38,11 @@ TODO:
 ## Installation
 
 ```bash
+
+# The PyPI version may be outdated.
+# Please consider using `git clone` to 
+# obtain the latest version.
+
 pip3 install miao-make
 ```
 
