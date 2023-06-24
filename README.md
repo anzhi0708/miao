@@ -109,7 +109,7 @@ $ cd my_project/
 
 # adding libs and `include_dir`s
 
-$ miao add ncurses --include_dir=(brew --prefix ncurses)/include
+$ miao add ncurses --include_dir=$(brew --prefix ncurses)/include
 Adding header directories ['/usr/local/opt/ncurses/include']
 Adding ('ncurses',) for `my_project`
 ```
