@@ -470,9 +470,9 @@ int main(int argc, char** argv) {
 {cmake_code_find_library}
 {cmake_code_include_directories}
 {cmake_code_link_libraries}
-            """,
+            """.strip(),
                 "CMakeLists.txt\n",
-            ).strip()
+            )
 
             ori_content = (
                 ori_content.replace(

@@ -25,7 +25,8 @@ TODO:
   - ☑ --standard 
   - ☐ --lib
 - ☑ miao add
-  - ☑ --include_dir
+  - ☑ --include_dirs
+  - ☑ --lib_dirs
 - ☑ miao build
 - ☑ miao run
 - ☑ miao clean
@@ -36,7 +37,7 @@ TODO:
 - ☐ miao config
   - ☐ --default_language
   - ☐ --default_language --standard
-  - ☐ --default_include_dir
+  - ☐ --default_include_dirs
 
 <br>
 
