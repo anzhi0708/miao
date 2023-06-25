@@ -115,6 +115,18 @@ $ cd my_project/
 $ miao add ncurses --include_dir=$(brew --prefix ncurses)/include
 Adding header directories ['/usr/local/opt/ncurses/include']
 Adding ('ncurses',) for `my_project`
+
+
+$ miao new tui && cd tui/
+$ miao add ftxui-dom ftxui-screen ftxui-component --include_dirs=/usr/local/include,/usr/local/include/ftxui --lib_dirs=/usr/local/lib
+
+Adding ('ftxui-dom', 'ftxui-screen', 'ftxui-component') for `tui`
+CMakeLists.txt
+find_library(ftxui-dom NAMES ftxui-dom PATHS /usr/local/lib)
+find_library(ftxui-screen NAMES ftxui-screen PATHS /usr/local/lib)
+find_library(ftxui-component NAMES ftxui-component PATHS /usr/local/lib)
+target_include_directories(tui.exe PRIVATE /usr/local/include /usr/local/include/ftxui)
+target_link_libraries(tui.exe ${ftxui-dom} ${ftxui-screen} ${ftxui-component})
 ```
 
 

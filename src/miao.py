@@ -465,14 +465,11 @@ int main(int argc, char** argv) {
             )
 
             # Render
-            self._print(
-                f"""
+            print(f"""
 {cmake_code_find_library}
 {cmake_code_include_directories}
 {cmake_code_link_libraries}
-            """.strip(),
-                "CMakeLists.txt\n",
-            )
+            """.strip())
 
             ori_content = (
                 ori_content.replace(
