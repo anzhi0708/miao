@@ -58,10 +58,12 @@ pip3 install miao-make
 
 ```bash
 $ miao help
-Miao Version 20230624
+
+Miao Version 20230626
 
    add                       Add dependencies.
-                             Use `--include_dir` to add header file directories.
+                             Use `--include_dirs` to add header file directories.
+                             Use `--lib_dirs` to add library file directories.
    build                     Compile the current project.
    clean                     Remove the build directory.
    config                    ...
@@ -85,11 +87,13 @@ Miao Version 20230624
 $ miao new my_project
  Created   my_project
  Added     CMakelists.txt
- (debug)   ```set(CMAKE_CXX_STANDARD 17)
-        file(GLOB_RECURSE SOURCES "src/*.cpp")```
- Created   src/ directory
+ (debug)   `
+           set(CMAKE_CXX_STANDARD 17)
+           file(GLOB_RECURSE SOURCES "src/*.cpp")
+           `
+ Created   `src/` directory
  Added     main.cpp
- Created   build/ directory
+ Created   `build/` directory
 
 
 # The `--language` and `--standard` flags
@@ -98,26 +102,32 @@ $ miao new 'hello world' --language cpp --standard 20
  Created   hello_world
  Added     CMakelists.txt
  (debug)   ```set(CMAKE_CXX_STANDARD 20)
-        file(GLOB_RECURSE SOURCES "src/*.cpp")```
- Created   src/ directory
+           file(GLOB_RECURSE SOURCES "src/*.cpp")```
+ Created   `src/` directory
  Added     main.cpp
- Created   build/ directory
+ Created   `build/` directory
 ```
 
 
 - `miao add` - Adding libraries
+
+Configure header files with `miao add LIB --include_dirs=DIR1,DIR2`
 
 ```bash
 
 $ cd my_project/
 
 
-$ miao add ncurses --include_dir=$(brew --prefix ncurses)/include
+$ miao add ncurses --include_dirs=$(brew --prefix ncurses)/include
 Adding header directories ['/usr/local/opt/ncurses/include']
 Adding ('ncurses',) for `my_project`
 
+```
 
-$ miao new tui && cd tui/
+and library files with `--lib_dirs=`
+
+```
+$ miao new tui && cd tui/  # Created project called `tui`
 $ miao add ftxui-dom ftxui-screen ftxui-component --include_dirs=/usr/local/include,/usr/local/include/ftxui --lib_dirs=/usr/local/lib
 
 Adding ('ftxui-dom', 'ftxui-screen', 'ftxui-component') for `tui`
