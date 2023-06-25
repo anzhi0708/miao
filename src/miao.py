@@ -23,7 +23,7 @@ class Miao:
     """
 
     sep: str = os.sep
-    width: int = os.get_terminal_size()[0]
+    width: int = 20 if not sys.stdout.isatty() else os.get_terminal_size()[0]
 
     # Basic CMakeLists.txt file
     basic_template: str = """
@@ -344,7 +344,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         # the CMake file immediately & directly from
         # their terminal
         __tmp: str = self.language_options.replace("\n", self._ljust("\n    "))
-        self._print(f"```{__tmp}```", self._ljust("(debug)"))
+        # self._print(f"```{__tmp}```", self._ljust("(debug)"))
 
         # Creating `src` directory
         os.mkdir(f"{project_directory}/src")
@@ -384,7 +384,7 @@ int main(int argc, char** argv) {
     def add(self, *libs: Union[list[str], None], **kwargs):
         """
         Add dependencies.
-        Use `--include_dir` to add header file directories.
+        Use `--include_dirs` to add header file directories.
         """
         root_dir: str = self.find_project_root()
         project_name: str = root_dir.split(os.sep)[-1]
@@ -396,11 +396,23 @@ int main(int argc, char** argv) {
             sys.exit(3)
 
         include_dirs_to_embed: str = ""
+        lib_dirs_to_embed: str = ""
 
-        if "include_dir" in kwargs:
-            header_directories: list[str] = kwargs.get("include_dir").split(",")
+
+        # Header Files Directories
+        if "include_dirs" in kwargs:
+            header_directories: list[str] = kwargs.get("include_dirs").split(",")
+            header_directories = list(filter(lambda e: e != '', header_directories))
             self._print(f"header directories {header_directories}", "Adding")
             include_dirs_to_embed = f"target_include_directories({project_name}.exe PRIVATE {' '.join(header_directories)})"
+
+        # Library Directories
+        if "lib_dirs" in kwargs:
+            lib_dirs: list[str] = kwargs.get("lib_dirs").split(",")
+            lib_dirs = list(filter(lambda e: e != '', lib_dirs))
+            lib_dirs_to_embed = f"{' '.join(lib_dirs)})"
+            self._print(f"lib directories {lib_dirs_to_embed}", "Got")
+
 
         cmake_lists_txt: str = f"{root_dir}/CMakeLists.txt"
         to_embed: str = ""
@@ -408,7 +420,7 @@ int main(int argc, char** argv) {
         with open(cmake_lists_txt, "r+") as cmake_lists:
             ori_content: str = cmake_lists.read()
             for lib_name in libs:
-                to_embed += f"find_library({lib_name} NEMES {lib_name})"
+                to_embed += f"find_library({lib_name} NEMES {lib_name}){{ LIB_DIRS }}"
                 to_embed += "\n"
             updated_cmake: str = ori_content.replace(
                 "# begin_find_library", "# begin_find_library\n" + to_embed.strip()
@@ -422,6 +434,8 @@ int main(int argc, char** argv) {
                     "# begin_include_directories",
                     "# begin_include_directories\n" + include_dirs_to_embed,
                 )
+            if lib_dirs_to_embed:
+                updated_cmake = jinja2.Template(updated_cmake).render(LIB_DIRS=f" {lib_dirs_to_embed}")
             # self._print("\n" + updated_cmake, "(debug)")
             cmake_lists.seek(0)
             cmake_lists.truncate()

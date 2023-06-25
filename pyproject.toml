@@ -16,7 +16,7 @@ classifiers = [
 dynamic = ["version"]
 
 [tool.setuptools.dynamic]
-version = { attr = "miao.__version__" }
+version = { attr = "miao.__VERSION__" }
 
 [project.scripts]
 miao = "miao:main"
