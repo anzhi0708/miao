@@ -14,7 +14,7 @@ import subprocess
 from typing import Union, Callable
 
 
-__VERSION__: str = "20230624"
+__VERSION__: str = "20230626"
 
 
 class Miao:
@@ -29,18 +29,24 @@ class Miao:
     basic_template: str = """
 cmake_minimum_required(VERSION 3.0)
 project({{ project_name }})
+
+# begin_language_options
 {{ language_options }}
+# end_language_options
 
 # begin_find_library
+{{ libraries_to_find }}
 # end_find_library
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 add_executable({{ project_name }}.exe ${SOURCES})
 
 # begin_include_directories
+{{ directories_to_include }}
 # end_include_directories
 
 # begin_link_libraries
+{{ libraries_to_link }}
 # end_link_libraries
     """.strip()
 
@@ -64,6 +70,10 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         LOG = enum.auto()
         WARNING = enum.auto()
         ERROR = enum.auto()
+
+    globals()["ERROR"] = _ConsoleOutputType.ERROR
+    globals()["WARNING"] = _ConsoleOutputType.WARNING
+    globals()["LOG"] = _ConsoleOutputType.LOG
 
     @property
     def __version_info__(self) -> str:
@@ -117,12 +127,12 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         self,
         text: str = "",
         prefix: str = "",
-        output_type: _ConsoleOutputType = _ConsoleOutputType.LOG,
+        output_type: _ConsoleOutputType = LOG,
     ):
         if self.use_color:
-            if output_type is Miao._ConsoleOutputType.ERROR:
+            if output_type is ERROR:
                 prefix = f"{colorama.Fore.RED}{prefix}{colorama.Fore.RESET}"
-            elif output_type is Miao._ConsoleOutputType.WARNING:
+            elif output_type is WARNING:
                 prefix = f"{colorama.Fore.YELLOW}{prefix}{colorama.Fore.RESET}"
             else:
                 prefix = f"{colorama.Fore.GREEN}{prefix}{colorama.Fore.RESET}"
@@ -173,22 +183,22 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         if root is None:
             self._print(
                 f"could not find `CMakeLists.txt` in `{self.current_directory}` or any parent directory",
-                "error:",
-                Miao._ConsoleOutputType.ERROR,
+                "error",
+                ERROR,
             )
             sys.exit(2)
         if echo:
-            self._print(root, self._ljust("root: "))
+            self._print(root, "Project")
         self.project_name = root.split(self.sep)[-1]
         old_dir: str = self.current_directory
         if echo:
-            self._print(old_dir, self._ljust("pwd: "))
+            self._print(old_dir, "PWD")
         if os.path.exists(build_dir := f"{root}/build"):
             if echo:
-                self._print(build_dir, self._ljust("Entering"))
+                self._print(build_dir, ("Entering"))
             os.chdir(build_dir)
         else:
-            self._print(build_dir, "mkdir")
+            self._print(build_dir, "Created")
             os.mkdir(build_dir)
             if echo:
                 self._print(build_dir, "Entering")
@@ -204,7 +214,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         """
 
         def error_exit():
-            self._print("failed to build", "error", Miao._ConsoleOutputType.ERROR)
+            self._print("failed to build", "error", ERROR)
 
         build_dir: str = self._enter_build_dir()
         src_dir: str = build_dir.replace("/build", "/src")
@@ -213,7 +223,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
             if run_cmake_result.returncode == 0:
                 self._print(
                     f"Successfully executed the command: {run_cmake_result.args}",
-                    self._ljust("Success"),
+                    "SUCCESS",
                 )
             else:
                 error_exit()
@@ -222,7 +232,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
                 if run_make_result.returncode == 0:
                     self._print(
                         f"Successfully executed the command: {run_make_result.args}",
-                        self._ljust("Success"),
+                        "SUCCESS",
                     )
                     copy_compile_commands_result = subprocess.run(
                         ["cp", "compile_commands.json", src_dir]
@@ -233,14 +243,14 @@ file(GLOB_RECURSE SOURCES "src/*.c")
                         else:
                             self._print(
                                 "failed to copy `compile_commands.json`",
-                                "warning",
-                                Miao._ConsoleOutputType.WARNING,
+                                "WARN",
+                                WARNING,
                             )
                     else:
                         self._print(
                             "failed to copy `compile_commands.json`",
-                            "warning",
-                            Miao._ConsoleOutputType.WARNING,
+                            "WARN",
+                            WARNING,
                         )
                     pass
                 else:
@@ -278,8 +288,8 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         ):
             self._print(
                 "invalid project name",
-                self._ljust("error"),
-                Miao._ConsoleOutputType.ERROR,
+                "error",
+                ERROR,
             )
             sys.exit(1)
 
@@ -289,8 +299,8 @@ file(GLOB_RECURSE SOURCES "src/*.c")
         if language not in ("c", "cpp", "cxx", "c++"):
             self._print(
                 "invalid language option",
-                self._ljust("error"),
-                Miao._ConsoleOutputType.ERROR,
+                "error",
+                ERROR,
             )
             sys.exit(1)
         else:
@@ -318,8 +328,8 @@ file(GLOB_RECURSE SOURCES "src/*.c")
                 # handle it more elegantly
                 self._print(
                     f"directory `{project_name}` already exists",
-                    self._ljust("error"),
-                    Miao._ConsoleOutputType.ERROR,
+                    "error",
+                    ERROR,
                 )
                 sys.exit(1)
 
@@ -348,7 +358,7 @@ file(GLOB_RECURSE SOURCES "src/*.c")
 
         # Creating `src` directory
         os.mkdir(f"{project_directory}/src")
-        self._print("src/ directory", self._ljust("Created"))
+        self._print("`src/` directory", self._ljust("Created"))
 
         # Creating minimum source file
         source_code_file_name: str = f"main.{'c' if language == 'c' else 'cpp'}"
@@ -370,7 +380,7 @@ int main(int argc, char** argv) {
 
         # Creating `build` directory
         os.mkdir(f"{project_directory}/build")
-        self._print("build/ directory", self._ljust("Created"))
+        self._print("`build/` directory", self._ljust("Created"))
 
     def init(self):
         self._todo()
@@ -385,63 +395,109 @@ int main(int argc, char** argv) {
         """
         Add dependencies.
         Use `--include_dirs` to add header file directories.
+        Use `--lib_dirs` to add library file directories.
         """
-        root_dir: str = self.find_project_root()
-        project_name: str = root_dir.split(os.sep)[-1]
+        project_root_dir: str = self.find_project_root()
+        project_name: str = project_root_dir.split(os.sep)[-1]
 
         if not libs:
-            self._print(
-                f"invalid argument: {libs}", "error", Miao._ConsoleOutputType.ERROR
-            )
+            self._print(f"invalid argument: {libs}", "error", ERROR)
             sys.exit(3)
 
-        include_dirs_to_embed: str = ""
+        # code to embed into CmakeLists.txt
+        cmake_code_include_directories: str = ""
         lib_dirs_to_embed: str = ""
 
+        #
 
         # Header Files Directories
         if "include_dirs" in kwargs:
             header_directories: list[str] = kwargs.get("include_dirs").split(",")
-            header_directories = list(filter(lambda e: e != '', header_directories))
-            self._print(f"header directories {header_directories}", "Adding")
-            include_dirs_to_embed = f"target_include_directories({project_name}.exe PRIVATE {' '.join(header_directories)})"
+            header_directories = list(filter(lambda e: e != "", header_directories))
+
+            # Check if these ARE actually valid paths
+            for directory in header_directories:
+                if not os.path.isdir(directory):
+                    self._print(f"invalid directory {directory}", "error", ERROR)
+                    sys.exit(4)
+
+            cmake_code_include_directories = f"target_include_directories({project_name}.exe PRIVATE {' '.join(header_directories)})"
 
         # Library Directories
         if "lib_dirs" in kwargs:
             lib_dirs: list[str] = kwargs.get("lib_dirs").split(",")
-            lib_dirs = list(filter(lambda e: e != '', lib_dirs))
-            lib_dirs_to_embed = f"{' '.join(lib_dirs)})"
-            self._print(f"lib directories {lib_dirs_to_embed}", "Got")
+            lib_dirs = list(filter(lambda e: e != "", lib_dirs))
+            for lib_dir in lib_dirs:
+                if not os.path.isdir(lib_dir):
+                    self._print(f"invalid lib directory {lib_dir}", "error", ERROR)
+                    sys.exit(4)
 
+            lib_dirs_to_embed: str = " ".join(lib_dirs)
+        else:
+            lib_dirs_to_embed = ""
 
-        cmake_lists_txt: str = f"{root_dir}/CMakeLists.txt"
-        to_embed: str = ""
+        cmake_lists_txt: str = f"{project_root_dir}/CMakeLists.txt"
+        cmake_code_find_library: str = ""
         self._print(f"{libs} for `{project_name}`", "Adding")
+
+        # `find_library(XXX NAMES xxxXx PATHS /x/y/z/)`
         with open(cmake_lists_txt, "r+") as cmake_lists:
             ori_content: str = cmake_lists.read()
+            libs_to_link: list = []
             for lib_name in libs:
-                to_embed += f"find_library({lib_name} NEMES {lib_name}){{ LIB_DIRS }}"
-                to_embed += "\n"
-            updated_cmake: str = ori_content.replace(
-                "# begin_find_library", "# begin_find_library\n" + to_embed.strip()
-            ).replace(
-                "# begin_link_libraries",
-                "# begin_link_libraries\n"
-                + f"target_link_libraries({project_name}.exe {' '.join(lib_name for lib_name in libs)})",
+                cmake_code_find_library += f"find_library({lib_name} NAMES {lib_name}"
+                cmake_code_find_library += "{{ LIB_DIRS }}"  # For jinja2 Template
+                cmake_code_find_library += ")\n"
+
+                lib_to_link: str = "${" + lib_name + "}"
+                libs_to_link.append(lib_to_link)
+
+            cmake_code_link_libraries: str = (
+                f"target_link_libraries({project_name}.exe {' '.join(libs_to_link)})"
             )
-            if include_dirs_to_embed:
-                updated_cmake = updated_cmake.replace(
-                    "# begin_include_directories",
-                    "# begin_include_directories\n" + include_dirs_to_embed,
+
+            cmake_code_find_library = (
+                jinja2.Template(cmake_code_find_library).render(
+                    LIB_DIRS=f" PATHS {lib_dirs_to_embed}"
                 )
-            if lib_dirs_to_embed:
-                updated_cmake = jinja2.Template(updated_cmake).render(LIB_DIRS=f" {lib_dirs_to_embed}")
-            # self._print("\n" + updated_cmake, "(debug)")
+                if lib_dirs_to_embed
+                else jinja2.Template(cmake_code_find_library).render(LIB_DIRS="")
+            )
+
+            # Render
+            self._print(
+                f"""
+{cmake_code_find_library}
+{cmake_code_include_directories}
+{cmake_code_link_libraries}
+            """,
+                "CMakeLists.txt\n",
+            ).strip()
+
+            ori_content = (
+                ori_content.replace(
+                    "# begin_find_library",
+                    "# begin_find_library\n" + "{{ libraries_to_find }}",
+                )
+                .replace(
+                    "# begin_link_libraries",
+                    "# begin_link_libraries\n" + "{{ libraries_to_link }}",
+                )
+                .replace(
+                    "# begin_include_directories",
+                    "# begin_include_directories\n" + "{{ directories_to_include }}",
+                )
+            )
+
+            updated_cmake: str = jinja2.Template(ori_content).render(
+                libraries_to_find=cmake_code_find_library.strip(),
+                libraries_to_link=cmake_code_link_libraries,
+                directories_to_include=cmake_code_include_directories,
+            )
+
             cmake_lists.seek(0)
             cmake_lists.truncate()
             cmake_lists.write(updated_cmake)
-
-        # self._todo()
 
     def remove(self, dep: str):
         """
@@ -453,10 +509,8 @@ int main(int argc, char** argv) {
         current_frame = inspect.currentframe()
         caller_frame = inspect.getouterframes(current_frame, 2)
         caller_name = caller_frame[1][3]
-        self._print("comming soon", f"`{caller_name}`", Miao._ConsoleOutputType.WARNING)
-        self._print(
-            "not implemented", f"`{caller_name}`", Miao._ConsoleOutputType.WARNING
-        )
+        self._print("comming soon", f"`{caller_name}`", WARNING)
+        self._print("not implemented", f"`{caller_name}`", WARNING)
 
     def _ljust(self, s: str) -> str:
         return " " + s.ljust(9, " ")
