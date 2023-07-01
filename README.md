@@ -27,6 +27,8 @@ TODO:
 - ☑ miao add
   - ☑ --include_dirs
   - ☑ --lib_dirs
+  - ☐ -I
+  - ☐ -L
 - ☑ miao build
 - ☑ miao run
 - ☑ miao clean
@@ -38,6 +40,9 @@ TODO:
   - ☐ --default_language
   - ☐ --default_language --standard
   - ☐ --default_include_dirs
+- ☐ miao info
+- ☐ miao pkgconfig
+- ☐ pkgconfig --libs --cflags NAME | miao
 
 <br>
 

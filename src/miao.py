@@ -14,7 +14,7 @@ import subprocess
 from typing import Union, Callable
 
 
-__VERSION__: str = "20230626"
+__VERSION__: str = "20230627"
 
 
 class Miao:
